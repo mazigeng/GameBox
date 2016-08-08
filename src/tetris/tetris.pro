@@ -7,7 +7,8 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    tetrisdata.cpp
 
 
 CONFIG(debug, debug|release) {
@@ -15,5 +16,8 @@ DESTDIR += ../binD
 } else {
 DESTDIR += ../bin
 }
+
+HEADERS += \
+    tetrisdata.h
 
 
