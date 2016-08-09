@@ -3,12 +3,20 @@
 
 #include <QObject>
 #include <QVector>
+#include <QSize>
 
 class TetrisData : public QObject
 {
     Q_OBJECT
 public:
     explicit TetrisData(QObject *parent = 0);
+
+    // 获得(x,y)元素的使用权限
+    int& At(int x, int y);
+    const int& At(int x, int y) const;
+
+    // 获得棋盘尺寸
+    QSize Size() const;
 
 signals:
 

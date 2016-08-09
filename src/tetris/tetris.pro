@@ -8,7 +8,8 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    tetrisdata.cpp
+    tetrisdata.cpp \
+    consolemodem.cpp
 
 
 CONFIG(debug, debug|release) {
@@ -18,6 +19,7 @@ DESTDIR += ../bin
 }
 
 HEADERS += \
-    tetrisdata.h
+    tetrisdata.h \
+    consolemodem.h
 
 
