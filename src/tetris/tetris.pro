@@ -9,7 +9,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     tetrisdata.cpp \
-    consolemodem.cpp
+    consolemodem.cpp \
+    tetriscell.cpp \
+    tetrisdriver.cpp
 
 
 CONFIG(debug, debug|release) {
@@ -20,6 +22,8 @@ DESTDIR += ../bin
 
 HEADERS += \
     tetrisdata.h \
-    consolemodem.h
+    consolemodem.h \
+    tetriscell.h \
+    tetrisdriver.h
 
 

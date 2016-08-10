@@ -13,6 +13,7 @@ public:
 
     // 获得(x,y)元素的使用权限
     int& At(int x, int y);
+    int& At(const QPoint& xy);
     const int& At(int x, int y) const;
 
     // 获得棋盘尺寸
@@ -27,5 +28,7 @@ private:
     static const int DX = 10;
     static const int DY = 20;
 };
+
+
 
 #endif // TETRISDATA_H
