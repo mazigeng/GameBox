@@ -44,6 +44,7 @@ void ConsoleModem::ShowTetrisData(const TetrisData &d)
     _stdOut << QString("┘") << endl;
 }
 
+
 QString ConsoleModem::TransData(int d) const
 {
     // 临时方案的映射表

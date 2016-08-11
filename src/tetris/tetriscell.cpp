@@ -7,14 +7,35 @@ TetrisCell::TetrisCell(Shape s, QObject *parent) : QObject(parent),_s(s)
 {
 }
 
-TetrisCell::TetrisCell(const TetrisCell &other) : _s(other._s), QObject(other.parent())
+TetrisCell::TetrisCell(const TetrisCell &other) :  QObject(other.parent()), _s(other._s), _lt(other._lt)
 {
+
+}
+
+TetrisCell &TetrisCell::operator=(const TetrisCell &other)
+{
+    if(this != &other)
+    {
+        _s = other._s;
+        _lt = other._lt;
+    }
+    return *this;
 }
 
 
 const QList<QPoint> TetrisCell::Points() const
 {
     return CELLS[_s];
+}
+
+void TetrisCell::SetLT(const QPoint &lt)
+{
+    _lt = lt;
+}
+
+const QPoint &TetrisCell::LT() const
+{
+    return _lt;
 }
 
 QMap<TetrisCell::Shape, QList<QPoint> > TetrisCell::InitCells()

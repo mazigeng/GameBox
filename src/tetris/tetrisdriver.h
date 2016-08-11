@@ -5,6 +5,7 @@
 #include "tetriscell.h"
 #include <QPoint>
 #include <QList>
+#include "keyboardmonitor.h"
 class TetrisData;
 
 class TetrisDriver : public QObject
@@ -20,13 +21,21 @@ public:
     ///
     int AddCell(TetrisCell::Shape s, const QPoint& lt);
 
+    void MoveCell(int index, const QPoint& newLT);
+
 
 signals:
+    void DataChange(const TetrisData&);
 
 public slots:
+    void KeyControl(long vk);
+
+private:
+    void ChangeDataValue(const TetrisCell& cell, int value);
 private:
     TetrisData& _datas;
     QList<TetrisCell> _cells;
+    KeyboardMonitor _km;
 };
 
 #endif // TETRISDRIVER_H

@@ -11,12 +11,13 @@ class ConsoleModem : public QObject
 public:
     explicit ConsoleModem(QObject *parent = 0);
 
-    // 将d中的数据，输出到控制台一次
-    void ShowTetrisData(const TetrisData& d);
+
 
 signals:
 
 public slots:
+    // 将d中的数据，输出到控制台一次
+    void ShowTetrisData(const TetrisData& d);
 
 private:
     // 将TetrisData中的int数据，转换为显示用的QString字符
