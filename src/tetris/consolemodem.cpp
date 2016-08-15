@@ -13,6 +13,7 @@ ConsoleModem::ConsoleModem(QObject *parent) : QObject(parent), _stdOut(stdout)
 
 void ConsoleModem::ShowTetrisData(const TetrisData &d)
 {
+    Gotoxy(0,0);
     // 输出第一排边框
     _stdOut <<  QString("┌");
     for (int n=0; n<d.Size().width(); ++n)
@@ -54,4 +55,14 @@ QString ConsoleModem::TransData(int d) const
     return keymap[d];
 }
 
+void ConsoleModem::Gotoxy(int x,int y)
+{
+    HANDLE hOutput;
+    COORD loc;
+    loc.X= y*2;
+    loc.Y= x;
+    hOutput= ::GetStdHandle(STD_OUTPUT_HANDLE);
+    ::SetConsoleCursorPosition(hOutput, loc);
+    return;
+}
 

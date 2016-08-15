@@ -21,13 +21,11 @@ int main(int argc, char *argv[])
     // 写入L
     driver.AddCell(TetrisCell::L,QPoint(1,1));
     driver.AddCell(TetrisCell::J,QPoint(7,1));
-    driver.AddCell(TetrisCell::T,QPoint(1,6));
     driver.AddCell(TetrisCell::O,QPoint(7,6));
     driver.AddCell(TetrisCell::Z,QPoint(1,10));
     driver.AddCell(TetrisCell::I,QPoint(5,14));
     driver.AddCell(TetrisCell::S,QPoint(7,10));
-
-
+    driver.AddCell(TetrisCell::T,QPoint(2,6));
     out.ShowTetrisData(d);
 
 

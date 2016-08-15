@@ -22,6 +22,7 @@ public:
     int AddCell(TetrisCell::Shape s, const QPoint& lt);
 
     void MoveCell(int index, const QPoint& newLT);
+    void RotateCell(int index);
 
 
 signals:
@@ -32,6 +33,7 @@ public slots:
 
 private:
     void ChangeDataValue(const TetrisCell& cell, int value);
+    bool IsSpacious(const QList<QPoint>& pts, const QPoint& lt, int value = 0) const;
 private:
     TetrisData& _datas;
     QList<TetrisCell> _cells;
