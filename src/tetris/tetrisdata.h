@@ -16,6 +16,8 @@ public:
     int& At(const QPoint& xy);
     const int& At(int x, int y) const;
 
+    void RemoveLine(int y);
+
     // 获得棋盘尺寸
     QSize Size() const;
 

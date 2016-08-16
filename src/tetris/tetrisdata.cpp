@@ -22,6 +22,15 @@ const int &TetrisData::At(int x, int y) const
     return _datas[x][y];
 }
 
+void TetrisData::RemoveLine(int y)
+{
+    for(int x=0; x<DX; ++x)
+    {
+        _datas[x].remove(y);
+        _datas[x].insert(0,0);
+    }
+}
+
 QSize TetrisData::Size() const
 {
     return QSize(DX,DY);

@@ -1,10 +1,23 @@
 #include "tetriscell.h"
 #include <QDebug>
+#include <QTime>
 
 
 const QMap<TetrisCell::Shape, QList<QPoint> > TetrisCell::CELLS(TetrisCell::InitCells());
 const QMap<TetrisCell::Shape, int> TetrisCell::ROTATE_TIMES(TetrisCell::InitRotateTimes());
 const QMap<TetrisCell::Shape, QPoint> TetrisCell::ROTATE_CENTER(TetrisCell::InitRotateCenter());     // 形状旋转中心
+
+TetrisCell::Shape TetrisCell::RandShape()
+{
+    QTime t;
+    if(t.msecsSinceStartOfDay() == 0)
+    {
+        t = QTime::currentTime();
+        qsrand(t.msecsSinceStartOfDay());
+    }
+
+    return static_cast<TetrisCell::Shape>(qrand() % TetrisCell::Z);
+}
 
 TetrisCell::TetrisCell(Shape s, QObject *parent) : QObject(parent), _pts(CELLS[s]), _s(s), _lt(0,0), _rotaiton(0)
 {
@@ -77,14 +90,7 @@ void TetrisCell::ReRotate()
 {
     if(Times() == 2)
     {
-        _rotaiton = (_rotaiton - 1 + Times()) % Times();
-        for(int n=0; n<_pts.size(); ++n)
-        {
-            if(_rotaiton)
-                Anticlockwise(_pts[n], ROTATE_CENTER[_s]);
-            else
-                Clockwise(_pts[n], ROTATE_CENTER[_s]);
-        }
+        Rotate();
     }
     else if(Times() == 4)
     {

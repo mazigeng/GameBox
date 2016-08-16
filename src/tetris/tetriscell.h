@@ -21,9 +21,11 @@ public:
         Z
     };
 
+    static TetrisCell::Shape RandShape();
+
 public:
     explicit TetrisCell(Shape s, QObject *parent = 0);
-    explicit TetrisCell(const TetrisCell& other);
+    TetrisCell(const TetrisCell& other);
     TetrisCell& operator=(const TetrisCell& other);
 
     // 形状的点数据

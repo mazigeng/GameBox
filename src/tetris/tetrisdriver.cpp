@@ -6,10 +6,11 @@
 #include "keyboardmonitor.h"
 #include <qt_windows.h>
 
-TetrisDriver::TetrisDriver(TetrisData& d, QObject *parent) : QObject(parent), _datas(d)
+TetrisDriver::TetrisDriver(TetrisData& d, QObject *parent) : QObject(parent), _datas(d), _dropTimer(this)
 {
     _km.start();
     connect(&_km,SIGNAL(KeyClicked(long)), this, SLOT(KeyControl(long)));
+    connect(&_dropTimer, SIGNAL(timeout()), this, SLOT(DropActive()));
 }
 
 int TetrisDriver::AddCell(TetrisCell::Shape s, const QPoint &lt)
@@ -22,6 +23,7 @@ int TetrisDriver::AddCell(TetrisCell::Shape s, const QPoint &lt)
     emit DataChange(_datas);
     // 存储新添加的cell
     _cells.push_back(cell);
+    //_dropTimer.start(700);
     return _cells.size() - 1;
 }
 
@@ -40,8 +42,13 @@ void TetrisDriver::MoveCell(int index, const QPoint &newLT)
 
         emit DataChange(_datas);
     }
-    else
+    else    // 有障碍不能放置
+    {
         ChangeDataValue(cell,1);
+        QPoint offset = newLT - cell.LT();
+        if(offset.y() > 0 )
+            DropEnd();
+    }
 
 }
 
@@ -62,6 +69,17 @@ void TetrisDriver::RotateCell(int index)
 
 }
 
+void TetrisDriver::RemoveLine(const QList<int> &lines)
+{
+    QList<int> sorted = lines;
+    qSort(sorted);
+    for(int n=0; n<sorted.size(); ++n)
+    {
+        _datas.RemoveLine(sorted.at(n));
+    }
+}
+
+
 void TetrisDriver::KeyControl(long vk)
 {
     if(_cells.size() <= 0)
@@ -80,8 +98,13 @@ void TetrisDriver::KeyControl(long vk)
         break;
     }
 
-    qDebug() << QString::number(vk,16);
 
+}
+
+void TetrisDriver::DropActive()
+{
+    if(_cells.size() > 0)
+        MoveCell(_cells.size() - 1,_cells.last().LT() + QPoint(0,1));
 }
 
 void TetrisDriver::ChangeDataValue(const TetrisCell &cell, int value)
@@ -105,5 +128,15 @@ bool TetrisDriver::IsSpacious(const QList<QPoint> &pts, const QPoint &lt, int va
             return false;
     }
     return true;
+}
+
+void TetrisDriver::DropEnd()
+{
+    _dropTimer.stop();
+    if(_cells.size())
+    {
+        TetrisCell cell = _cells.takeLast();
+        emit MoveEnd(cell);
+    }
 }
 
