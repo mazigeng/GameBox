@@ -17,9 +17,15 @@ public:
     // 形状的点数据
     const QList<QPoint> Points() const;
 
+    TetrisCreator::Shape Shape() const;
+
     // 设置左上角相对坐标
     void SetLT(const QPoint& lt);
     const QPoint& LT() const;
+
+    /// \brief Rect 根据Points()，实时获得坐标点的左上右下的极值。
+    /// \return
+    QRect Rect() const;
 
     // 旋转
     void Rotate();

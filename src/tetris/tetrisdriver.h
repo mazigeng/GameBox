@@ -7,6 +7,7 @@
 #include <QList>
 #include "keyboardmonitor.h"
 #include <QTimer>
+#include "define.h"
 class TetrisData;
 
 class TetrisDriver : public QObject
@@ -44,6 +45,9 @@ public:
     /// \return 移动是否成功
     bool Move(const QPoint& offset);
 
+    /// \brief DropFinish 将active方块直接落到底
+    void DropFinish();
+
     /// \brief Rotate 旋转当前活动的Cell
     /// \return 旋转是否成功
     bool Rotate();
@@ -75,19 +79,25 @@ private slots:
 private:
     /// \brief SolidifyValue 根据active的点信息，将v值写入data中
     /// \param v 写入值
-    void SolidifyValue(int v);
+    void SolidifyValue(Diamond v);
+    void SolidifyValue(TetrisCell* cell, Diamond v);
 
     /// \brief IsSpacious 判断是否有存放空间
     /// \param pts 点集合
     /// \param lt 相对data左上角坐标
     /// \param value 对比值
     /// \return 返回true 有空间存放
-    bool IsSpacious(const QList<QPoint>& pts, const QPoint& lt, int value = 0) const;
+    bool IsSpacious(const QList<QPoint>& pts, const QPoint& lt, Diamond value = Background) const;
 
+    bool Adjust();
+
+    void Predict();
+    void ClearPredict();
 
 private:
     TetrisData& _datas;
     TetrisCell* _active;
+    TetrisCell* _prediction;
     QTimer _dropTimer;
 };
 

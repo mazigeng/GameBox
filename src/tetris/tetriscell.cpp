@@ -1,5 +1,6 @@
 #include "tetriscell.h"
 #include <QDebug>
+#include <QRect>
 
 TetrisCell::TetrisCell(TetrisCreator::Shape s, const QPoint &lt, QObject *parent) : QObject(parent), _pts(TetrisCreator::CELLS[s]), _s(s), _lt(lt), _rotaiton(0)
 {
@@ -27,6 +28,11 @@ const QList<QPoint> TetrisCell::Points() const
     return _pts;
 }
 
+TetrisCreator::Shape TetrisCell::Shape() const
+{
+    return _s;
+}
+
 void TetrisCell::SetLT(const QPoint &lt)
 {
     _lt = lt;
@@ -35,6 +41,23 @@ void TetrisCell::SetLT(const QPoint &lt)
 const QPoint &TetrisCell::LT() const
 {
     return _lt;
+}
+
+QRect TetrisCell::Rect() const
+{
+    QRect ret(QPoint(10,10),QPoint(-10,-10));
+    foreach(const QPoint& pt, _pts)
+    {
+        if(pt.x() < ret.left())
+            ret.setLeft(pt.x());
+        if(pt.x() > ret.right())
+            ret.setRight(pt.x());
+        if(pt.y() < ret.top())
+            ret.setTop(pt.y());
+        if(pt.y() > ret.bottom())
+            ret.setBottom(pt.y());
+    }
+    return ret;
 }
 
 

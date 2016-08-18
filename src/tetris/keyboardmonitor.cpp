@@ -31,6 +31,8 @@ long KeyboardMonitor::Ascii2Vk(long ascii)
     case 224 + 72: return VK_UP;
     case 224 + 77: return VK_RIGHT;
     case 224 + 80: return VK_DOWN;
+    case 32: return VK_SPACE;
+    case 13: return VK_RETURN;
     default:
         break;
     }

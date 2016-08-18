@@ -3,7 +3,7 @@
 #include <QTimer>
 #include <QDebug>
 
-TetrisDriver::TetrisDriver(TetrisData& d, QObject *parent) : QObject(parent), _datas(d), _active(NULL), _dropTimer(this)
+TetrisDriver::TetrisDriver(TetrisData& d, QObject *parent) : QObject(parent), _datas(d), _active(NULL),_prediction(NULL), _dropTimer(this)
 {
     connect(&_dropTimer, SIGNAL(timeout()), this, SLOT(Drop()));
 }
@@ -13,7 +13,8 @@ void TetrisDriver::AddCell(TetrisCreator::Shape s, const QPoint &lt)
     Q_ASSERT(_active == NULL);
     _active = new TetrisCell(s,lt,this);
 
-    SolidifyValue(1);
+    Predict();
+    SolidifyValue(Cell);
     emit DataChange();
 }
 
@@ -45,26 +46,31 @@ bool TetrisDriver::Move(TetrisDriver::Direction d)
 bool TetrisDriver::Move(const QPoint &offset)
 {
     Q_ASSERT(_active);
-    bool ret = true;
-
-    SolidifyValue(0);
+    bool ret = false;
 
     // 探测新位置是否有障碍。
     if(IsSpacious(_active->Points(), _active->LT() + offset))
     {
+        SolidifyValue(Blank);        // 擦除
         _active->SetLT(_active->LT() + offset);              // 更改坐标
-        SolidifyValue(1);        // 更新当前显示
+
+        Predict();
+        SolidifyValue(Cell);        // 更新当前显示
 
         emit DataChange();
         ret = true;
     }
-    else    // 有障碍不能放置
-    {
-        SolidifyValue(1);
-        ret = false;
-    }
 
     return ret;
+}
+
+void TetrisDriver::DropFinish()
+{
+    Q_ASSERT(_active);
+    Q_ASSERT(_prediction);
+    SolidifyValue(Blank);
+    _active->SetLT(_prediction->LT());
+    Drop();
 }
 
 bool TetrisDriver::Rotate()
@@ -72,19 +78,25 @@ bool TetrisDriver::Rotate()
     Q_ASSERT(_active);
     bool ret=true;
 
-    SolidifyValue(0);
+    SolidifyValue(Blank);
     _active->Rotate();
 
     if(!IsSpacious(_active->Points(),_active->LT()))
     {
-        _active->ReRotate();
-        ret = false;
+        if(!Adjust())
+        {
+            _active->ReRotate();
+            ret = false;
+        }
     }
 
-    SolidifyValue(1);        // 更新当前显示
+    Predict();
+    SolidifyValue(Cell);        // 更新当前显示
 
     if(ret)
+    {
         emit DataChange();
+    }
 
     return ret;
 }
@@ -100,7 +112,10 @@ void TetrisDriver::RemoveLine(const QList<int> &lines)
     }
 
     if(lines.size())
+    {
+
         emit DataChange();
+    }
 }
 
 const TetrisCell *TetrisDriver::Active()
@@ -110,32 +125,113 @@ const TetrisCell *TetrisDriver::Active()
 
 void TetrisDriver::Solidify()
 {
-    if(_active)
-        delete _active;
+    ClearPredict();
+    SolidifyValue(Background);
     _active = NULL;
 }
 
 
-void TetrisDriver::SolidifyValue(int v)
+void TetrisDriver::SolidifyValue(Diamond v)
 {
     Q_ASSERT(_active);
-    foreach (QPoint pt, _active->Points())
+    SolidifyValue(_active,v);
+}
+
+void TetrisDriver::SolidifyValue(TetrisCell *cell, Diamond v)
+{
+    Q_ASSERT(cell);
+    foreach (QPoint pt, cell->Points())
     {
-        _datas.At(pt + _active->LT()) = v;
+        _datas.At(pt + cell->LT()) = v;
     }
 }
 
-bool TetrisDriver::IsSpacious(const QList<QPoint> &pts, const QPoint &lt, int value) const
+bool TetrisDriver::IsSpacious(const QList<QPoint> &pts, const QPoint &lt, Diamond value) const
 {
     foreach(const QPoint& pt, pts)
     {
         QPoint ptAt = pt + lt;
         if(ptAt.x() < 0 || ptAt.x() >= _datas.Size().width() ||
            ptAt.y() < 0 || ptAt.y() >= _datas.Size().height() ||
-           _datas.At(ptAt) != value)
+           _datas.At(ptAt) == value)
             return false;
     }
     return true;
+}
+
+bool TetrisDriver::Adjust()
+{
+    Q_ASSERT(_active);
+    QPoint lt = _active->LT();
+    // 左移一格调整
+    _active->SetLT(lt + QPoint(-1,0));
+    if(IsSpacious(_active->Points(), _active->LT()))
+        return true;
+
+    // 右移一格调整
+    _active->SetLT(lt + QPoint(1,0));
+    if(IsSpacious(_active->Points(), _active->LT()))
+        return true;
+
+    // 对于I形状，我们特殊处理，允许它再右移一次。
+    if(_active->Shape() == TetrisCreator::I)
+    {
+        // 右移二格调整
+        _active->SetLT(lt + QPoint(2,0));
+        if(IsSpacious(_active->Points(), _active->LT()))
+            return true;
+    }
+
+    _active->SetLT(lt);
+    return false;
+
+}
+
+void TetrisDriver::Predict()
+{
+    Q_ASSERT(_active);
+    QPoint PreLt(_active->LT().x(), _datas.Size().height());
+
+    foreach(const QPoint& pt, _active->Points())
+    {
+        int i = _datas.indexOfY(pt.x() + _active->LT().x(),Background, pt.y() + _active->LT().y());
+        i = (i == -1 ? _datas.Size().height() : i);
+
+        int offset = i - pt.y() - _active->LT().y() - 1;
+
+        QPoint newLt = _active->LT() + QPoint(0,offset);
+
+        if(IsSpacious(_active->Points(),newLt))
+        {
+            if(PreLt.y() > newLt.y())
+                PreLt = newLt;
+        }
+    }
+
+
+    // 显示
+    if(PreLt != _active->LT())
+    {
+        if(_prediction)
+        {
+            ClearPredict();
+        }
+        _prediction = new TetrisCell(*_active);
+        _prediction->SetLT(PreLt);
+        SolidifyValue(_prediction,Prediction);
+    }
+
+}
+
+void TetrisDriver::ClearPredict()
+{
+    if(_prediction)
+    {
+        SolidifyValue(_prediction,Blank);
+        delete _prediction;
+        _prediction = NULL;
+    }
+
 }
 
 

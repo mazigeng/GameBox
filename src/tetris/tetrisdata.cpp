@@ -1,48 +1,57 @@
 #include "tetrisdata.h"
 #include <QPoint>
+#include <QDebug>
 
-TetrisData::TetrisData(QObject *parent) : QObject(parent), _datas(DX,QVector<int>(DY,0))
+TetrisData::TetrisData(int w, int h, QObject *parent) : QObject(parent), W(w), H(h),_datas(w,QVector<Diamond>(h,Blank))
 {
 }
 
-int &TetrisData::At(int x, int y)
+Diamond &TetrisData::At(int x, int y)
 {
-    Q_ASSERT(x<DX && x>=0 && y<DY && y>=0);
+    Q_ASSERT(x<W && x>=0 && y<H && y>=0);
     return _datas[x][y];
 }
 
-int &TetrisData::At(const QPoint &xy)
+Diamond &TetrisData::At(const QPoint &xy)
 {
     return At(xy.x(),xy.y());
 }
 
-const int &TetrisData::At(int x, int y) const
+const Diamond &TetrisData::At(int x, int y) const
 {
-    Q_ASSERT(x<DX && x>=0 && y<DY && y>=0);
+    Q_ASSERT(x<W && x>=0 && y<H && y>=0);
     return _datas[x][y];
 }
 
-void TetrisData::RemoveLine(int y)
+void TetrisData::RemoveLine(int y, bool down)
 {
-    for(int x=0; x<DX; ++x)
+    for(int x=0; x<W; ++x)
     {
         _datas[x].remove(y);
-        _datas[x].insert(0,0);
+        _datas[x].insert(down ? 0 : _datas[x].size(),Blank);
     }
 }
 
-int TetrisData::indexOfY(int x, int value, int from)
+int TetrisData::indexOfY(int x, Diamond value, int from)
 {
     Q_ASSERT(x>=0 && x<_datas.size());
     return _datas[x].indexOf(value,from);
 
 }
 
+void TetrisData::Fill(Diamond value)
+{
+    for(int y=0; y<_datas.size(); ++y)
+    {
+        _datas[y].fill(value);
+    }
+}
+
 
 
 QSize TetrisData::Size() const
 {
-    return QSize(DX,DY);
+    return QSize(W,H);
 }
 
 

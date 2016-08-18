@@ -6,6 +6,7 @@
 #include "tetrisdriver.h"
 #include "consolemodem.h"
 #include "tetrisjudger.h"
+#include "tetrisforecast.h"
 
 class TetrisGame : public QObject
 {
@@ -13,6 +14,8 @@ class TetrisGame : public QObject
 public:
     explicit TetrisGame(QObject *parent = 0);
     void Start();
+    void Pause();
+    void Resume();
 
 signals:
 
@@ -27,10 +30,12 @@ private slots:
 
 private:
     TetrisData _data;
+    TetrisForecast _forecast;
     TetrisDriver _driver;
     ConsoleModem _out;
     TetrisJudger _judger;
     KeyboardMonitor _km;
+    bool _pause;
 
 };
 
