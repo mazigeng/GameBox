@@ -20,7 +20,9 @@ public slots:
 
 private slots:
     void AddCell();
-    void MoveEnd(TetrisCell cell);
+    void DropEnd();
+    void KeyControl(long vk);
+
 
 
 private:
@@ -28,6 +30,8 @@ private:
     TetrisDriver _driver;
     ConsoleModem _out;
     TetrisJudger _judger;
+    KeyboardMonitor _km;
+
 };
 
 #endif // TETRISGAME_H

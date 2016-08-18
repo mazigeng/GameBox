@@ -31,6 +31,15 @@ void TetrisData::RemoveLine(int y)
     }
 }
 
+int TetrisData::indexOfY(int x, int value, int from)
+{
+    Q_ASSERT(x>=0 && x<_datas.size());
+    return _datas[x].indexOf(value,from);
+
+}
+
+
+
 QSize TetrisData::Size() const
 {
     return QSize(DX,DY);

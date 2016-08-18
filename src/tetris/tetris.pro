@@ -14,7 +14,8 @@ SOURCES += main.cpp \
     tetrisdriver.cpp \
     keyboardmonitor.cpp \
     tetrisgame.cpp \
-    tetrisjudger.cpp
+    tetrisjudger.cpp \
+    tetriscreator.cpp
 
 
 CONFIG(debug, debug|release) {
@@ -30,6 +31,7 @@ HEADERS += \
     tetrisdriver.h \
     keyboardmonitor.h \
     tetrisgame.h \
-    tetrisjudger.h
+    tetrisjudger.h \
+    tetriscreator.h
 
 

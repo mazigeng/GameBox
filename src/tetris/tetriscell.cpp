@@ -1,25 +1,7 @@
 #include "tetriscell.h"
 #include <QDebug>
-#include <QTime>
 
-
-const QMap<TetrisCell::Shape, QList<QPoint> > TetrisCell::CELLS(TetrisCell::InitCells());
-const QMap<TetrisCell::Shape, int> TetrisCell::ROTATE_TIMES(TetrisCell::InitRotateTimes());
-const QMap<TetrisCell::Shape, QPoint> TetrisCell::ROTATE_CENTER(TetrisCell::InitRotateCenter());     // 形状旋转中心
-
-TetrisCell::Shape TetrisCell::RandShape()
-{
-    QTime t;
-    if(t.msecsSinceStartOfDay() == 0)
-    {
-        t = QTime::currentTime();
-        qsrand(t.msecsSinceStartOfDay());
-    }
-
-    return static_cast<TetrisCell::Shape>(qrand() % TetrisCell::Z);
-}
-
-TetrisCell::TetrisCell(Shape s, QObject *parent) : QObject(parent), _pts(CELLS[s]), _s(s), _lt(0,0), _rotaiton(0)
+TetrisCell::TetrisCell(TetrisCreator::Shape s, const QPoint &lt, QObject *parent) : QObject(parent), _pts(TetrisCreator::CELLS[s]), _s(s), _lt(lt), _rotaiton(0)
 {
 }
 
@@ -57,30 +39,28 @@ const QPoint &TetrisCell::LT() const
 
 
 
-int TetrisCell::Times() const
-{
-    return ROTATE_TIMES[_s];
-}
+
 
 void TetrisCell::Rotate()
 {
-    if(Times() == 2)
+    int times = TetrisCreator::Times(_s);
+    if(times == 2)
     {
-        _rotaiton = (_rotaiton + 1) % Times();
+        _rotaiton = (_rotaiton + 1) % times;
         for(int n=0; n<_pts.size(); ++n)
         {
             if(_rotaiton == 0)
-                Anticlockwise(_pts[n], ROTATE_CENTER[_s]);
+                TetrisCreator::Anticlockwise(_pts[n], TetrisCreator::ROTATE_CENTER[_s]);
             else
-                Clockwise(_pts[n], ROTATE_CENTER[_s]);
+                TetrisCreator::Clockwise(_pts[n], TetrisCreator::ROTATE_CENTER[_s]);
         }
     }
-    else if(Times() == 4)
+    else if(times == 4)
     {
-        _rotaiton = (_rotaiton + 1) % Times();
+        _rotaiton = (_rotaiton + 1) % times;
         for(int n=0; n<_pts.size(); ++n)
         {
-            Clockwise(_pts[n],ROTATE_CENTER[_s]);
+            TetrisCreator::Clockwise(_pts[n],TetrisCreator::ROTATE_CENTER[_s]);
         }
     }
 
@@ -88,91 +68,17 @@ void TetrisCell::Rotate()
 
 void TetrisCell::ReRotate()
 {
-    if(Times() == 2)
+    int times = TetrisCreator::Times(_s);
+    if(times == 2)
     {
         Rotate();
     }
-    else if(Times() == 4)
+    else if(times == 4)
     {
-        _rotaiton = (_rotaiton - 1 + Times()) % Times();
+        _rotaiton = (_rotaiton - 1 + times) % times;
         for(int n=0; n<_pts.size(); ++n)
         {
-            Anticlockwise(_pts[n],ROTATE_CENTER[_s]);
+            TetrisCreator::Anticlockwise(_pts[n],TetrisCreator::ROTATE_CENTER[_s]);
         }
     }
 }
-
-void TetrisCell::Clockwise(QPoint &pt, const QPoint &center)
-{
-    pt -= center;
-
-    int temp = pt.x();
-    pt.setX(-pt.y());
-    pt.setY(temp);
-
-    pt += center;
-}
-
-void TetrisCell::Anticlockwise(QPoint &pt, const QPoint &center)
-{
-    pt -= center;
-
-    int temp = pt.x();
-    pt.setX(pt.y());
-    pt.setY(-temp);
-
-    pt += center;
-}
-
-
-QMap<TetrisCell::Shape, QList<QPoint> > TetrisCell::InitCells()
-{
-    QList<QPoint> O,T,L,J,I,S,Z;
-    O << QPoint(0,0) << QPoint(1,0) << QPoint(0,1) << QPoint(1,1);
-    T << QPoint(0,0) << QPoint(1,0) << QPoint(2,0) << QPoint(1,1);
-    L << QPoint(0,0) << QPoint(0,1) << QPoint(0,2) << QPoint(1,2);
-    J << QPoint(1,0) << QPoint(1,1) << QPoint(0,2) << QPoint(1,2);
-    I << QPoint(0,0) << QPoint(0,1) << QPoint(0,2) << QPoint(0,3);
-    S << QPoint(1,0) << QPoint(2,0) << QPoint(0,1) << QPoint(1,1);
-    Z << QPoint(0,0) << QPoint(1,0) << QPoint(1,1) << QPoint(2,1);
-
-    QMap<TetrisCell::Shape, QList<QPoint> > ret;
-    ret.insert(TetrisCell::O,O);
-    ret.insert(TetrisCell::T,T);
-    ret.insert(TetrisCell::L,L);
-    ret.insert(TetrisCell::J,J);
-    ret.insert(TetrisCell::I,I);
-    ret.insert(TetrisCell::S,S);
-    ret.insert(TetrisCell::Z,Z);
-
-    return ret;
-}
-
-QMap<TetrisCell::Shape, int> TetrisCell::InitRotateTimes()
-{
-    QMap<TetrisCell::Shape, int> ret;
-    ret.insert(TetrisCell::O,0);
-    ret.insert(TetrisCell::T,4);
-    ret.insert(TetrisCell::L,4);
-    ret.insert(TetrisCell::J,4);
-    ret.insert(TetrisCell::I,2);
-    ret.insert(TetrisCell::S,2);
-    ret.insert(TetrisCell::Z,2);
-
-    return ret;
-}
-
-QMap<TetrisCell::Shape, QPoint> TetrisCell::InitRotateCenter()
-{
-    QMap<TetrisCell::Shape, QPoint> ret;
-    ret.insert(TetrisCell::O,QPoint(0,0));
-    ret.insert(TetrisCell::T,QPoint(1,0));
-    ret.insert(TetrisCell::L,QPoint(1,1));
-    ret.insert(TetrisCell::J,QPoint(0,1));
-    ret.insert(TetrisCell::I,QPoint(0,1));
-    ret.insert(TetrisCell::S,QPoint(1,0));
-    ret.insert(TetrisCell::Z,QPoint(1,0));
-
-    return ret;
-}
-

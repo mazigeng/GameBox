@@ -2,72 +2,93 @@
 #include "tetrisdata.h"
 #include <QTimer>
 #include <QDebug>
-#include <conio.h>
-#include "keyboardmonitor.h"
-#include <qt_windows.h>
 
-TetrisDriver::TetrisDriver(TetrisData& d, QObject *parent) : QObject(parent), _datas(d), _dropTimer(this)
+TetrisDriver::TetrisDriver(TetrisData& d, QObject *parent) : QObject(parent), _datas(d), _active(NULL), _dropTimer(this)
 {
-    _km.start();
-    connect(&_km,SIGNAL(KeyClicked(long)), this, SLOT(KeyControl(long)));
-    connect(&_dropTimer, SIGNAL(timeout()), this, SLOT(DropActive()));
+    connect(&_dropTimer, SIGNAL(timeout()), this, SLOT(Drop()));
 }
 
-int TetrisDriver::AddCell(TetrisCell::Shape s, const QPoint &lt)
+void TetrisDriver::AddCell(TetrisCreator::Shape s, const QPoint &lt)
 {
-    TetrisCell cell(s);
-    cell.SetLT(lt);
+    Q_ASSERT(_active == NULL);
+    _active = new TetrisCell(s,lt,this);
 
-    ChangeDataValue(cell,1);
-
-    emit DataChange(_datas);
-    // 存储新添加的cell
-    _cells.push_back(cell);
-    //_dropTimer.start(700);
-    return _cells.size() - 1;
+    SolidifyValue(1);
+    emit DataChange();
 }
 
-void TetrisDriver::MoveCell(int index, const QPoint &newLT)
+void TetrisDriver::Drop(bool on)
 {
-    Q_ASSERT(_cells.size() > index && index >= 0);
-    TetrisCell& cell = _cells[index];
+    if(on)
+        _dropTimer.start(700);
+    else
+        _dropTimer.stop();
+}
 
-    ChangeDataValue(cell,0);        // 擦除当前显示
+bool TetrisDriver::Move(TetrisDriver::Direction d)
+{
+    Q_ASSERT(_active);
+    QPoint offset;
+    switch (d)
+    {
+    case Left: offset=QPoint(-1,0); break;
+    case Up: offset=QPoint(0,-1); break;
+    case Right: offset=QPoint(1,0); break;
+    case Down: offset=QPoint(0,1); break;
+    default:
+        break;
+    }
+
+    return Move(offset);
+}
+
+bool TetrisDriver::Move(const QPoint &offset)
+{
+    Q_ASSERT(_active);
+    bool ret = true;
+
+    SolidifyValue(0);
 
     // 探测新位置是否有障碍。
-    if(IsSpacious(cell.Points(), newLT))
+    if(IsSpacious(_active->Points(), _active->LT() + offset))
     {
-        cell.SetLT(newLT);              // 更改坐标
-        ChangeDataValue(cell,1);        // 更新当前显示
+        _active->SetLT(_active->LT() + offset);              // 更改坐标
+        SolidifyValue(1);        // 更新当前显示
 
-        emit DataChange(_datas);
+        emit DataChange();
+        ret = true;
     }
     else    // 有障碍不能放置
     {
-        ChangeDataValue(cell,1);
-        QPoint offset = newLT - cell.LT();
-        if(offset.y() > 0 )
-            DropEnd();
+        SolidifyValue(1);
+        ret = false;
     }
 
+    return ret;
 }
 
-void TetrisDriver::RotateCell(int index)
+bool TetrisDriver::Rotate()
 {
-    Q_ASSERT(_cells.size() > index && index >= 0);
-    TetrisCell& cell = _cells[index];
+    Q_ASSERT(_active);
+    bool ret=true;
 
-    ChangeDataValue(cell,0);        // 擦除当前显示
-    cell.Rotate();
+    SolidifyValue(0);
+    _active->Rotate();
 
+    if(!IsSpacious(_active->Points(),_active->LT()))
+    {
+        _active->ReRotate();
+        ret = false;
+    }
 
-    if(!IsSpacious(cell.Points(),cell.LT()))
-        cell.ReRotate();
+    SolidifyValue(1);        // 更新当前显示
 
-    ChangeDataValue(cell,1);        // 更新当前显示
-    emit DataChange(_datas);
+    if(ret)
+        emit DataChange();
 
+    return ret;
 }
+
 
 void TetrisDriver::RemoveLine(const QList<int> &lines)
 {
@@ -77,43 +98,30 @@ void TetrisDriver::RemoveLine(const QList<int> &lines)
     {
         _datas.RemoveLine(sorted.at(n));
     }
+
+    if(lines.size())
+        emit DataChange();
+}
+
+const TetrisCell *TetrisDriver::Active()
+{
+    return _active;
+}
+
+void TetrisDriver::Solidify()
+{
+    if(_active)
+        delete _active;
+    _active = NULL;
 }
 
 
-void TetrisDriver::KeyControl(long vk)
+void TetrisDriver::SolidifyValue(int v)
 {
-    if(_cells.size() <= 0)
-        return;
-
-    int index = _cells.size() - 1;
-    const TetrisCell& cell= _cells[index];
-
-    switch(vk)
+    Q_ASSERT(_active);
+    foreach (QPoint pt, _active->Points())
     {
-    case VK_LEFT:  MoveCell(index,cell.LT() + QPoint(-1,0)); break;
-    case VK_UP: RotateCell(index); break;
-    case VK_RIGHT: MoveCell(index,cell.LT() + QPoint(1,0)); break;
-    case VK_DOWN: MoveCell(index,cell.LT() + QPoint(0,1)); break;
-    default:
-        break;
-    }
-
-
-}
-
-void TetrisDriver::DropActive()
-{
-    if(_cells.size() > 0)
-        MoveCell(_cells.size() - 1,_cells.last().LT() + QPoint(0,1));
-}
-
-void TetrisDriver::ChangeDataValue(const TetrisCell &cell, int value)
-{
-    const QList<QPoint> pts = cell.Points();
-    foreach (QPoint pt, pts)
-    {
-
-        _datas.At(pt + cell.LT()) = value;
+        _datas.At(pt + _active->LT()) = v;
     }
 }
 
@@ -130,13 +138,18 @@ bool TetrisDriver::IsSpacious(const QList<QPoint> &pts, const QPoint &lt, int va
     return true;
 }
 
-void TetrisDriver::DropEnd()
+
+void TetrisDriver::Drop()
 {
-    _dropTimer.stop();
-    if(_cells.size())
+    if(_active)
     {
-        TetrisCell cell = _cells.takeLast();
-        emit MoveEnd(cell);
+        if(!Move(Down))
+        {
+            _dropTimer.stop();
+            emit DropEnd();
+        }
     }
+    else
+        _dropTimer.stop();
 }
 

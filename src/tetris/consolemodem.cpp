@@ -6,45 +6,17 @@
 #include <qt_windows.h>
 #endif
 
-ConsoleModem::ConsoleModem(QObject *parent) : QObject(parent), _stdOut(stdout)
+ConsoleModem::ConsoleModem(const TetrisData& d, QObject *parent) : QObject(parent), _stdOut(stdout), _d(d)
 {
 
 }
 
-void ConsoleModem::ShowTetrisData(const TetrisData &d)
+
+
+void ConsoleModem::Repaint()
 {
-    Gotoxy(0,0);
-    // 输出第一排边框
-    _stdOut <<  QString("┌");
-    for (int n=0; n<d.Size().width(); ++n)
-    {
-        _stdOut << QString("─");
-    }
-    _stdOut << QString("┐") << endl;
-
-    // 输出棋盘20行
-    for(int y=0; y<d.Size().height(); ++y)
-    {
-        // 每行开始先输出边界
-        _stdOut << QString("│");
-        // 输出每列内容
-        for (int x=0; x<d.Size().width(); ++x)
-        {
-            _stdOut << TransData(d.At(x,y));
-        }
-        // 结束输出边界
-        _stdOut << QString("│") << endl;
-    }
-
-    // 最后一排输出边框
-    _stdOut <<  QString("└");
-    for (int n=0; n<d.Size().width(); ++n)
-    {
-        _stdOut << QString("─");
-    }
-    _stdOut << QString("┘") << endl;
+    Reflash();
 }
-
 
 QString ConsoleModem::TransData(int d) const
 {
@@ -53,6 +25,41 @@ QString ConsoleModem::TransData(int d) const
     static const QString keymap[] = {"  ", "■"};
 
     return keymap[d];
+}
+
+void ConsoleModem::Reflash()
+{
+
+    Gotoxy(0,0);
+    // 输出第一排边框
+    _stdOut <<  QString("┌");
+    for (int n=0; n<_d.Size().width(); ++n)
+    {
+        _stdOut << QString("─");
+    }
+    _stdOut << QString("┐") << endl;
+
+    // 输出棋盘20行
+    for(int y=0; y<_d.Size().height(); ++y)
+    {
+        // 每行开始先输出边界
+        _stdOut << QString("│");
+        // 输出每列内容
+        for (int x=0; x<_d.Size().width(); ++x)
+        {
+            _stdOut << TransData(_d.At(x,y));
+        }
+        // 结束输出边界
+        _stdOut << QString("│") << endl;
+    }
+
+    // 最后一排输出边框
+    _stdOut <<  QString("└");
+    for (int n=0; n<_d.Size().width(); ++n)
+    {
+        _stdOut << QString("─");
+    }
+    _stdOut << QString("┘") << endl;
 }
 
 void ConsoleModem::Gotoxy(int x,int y)
