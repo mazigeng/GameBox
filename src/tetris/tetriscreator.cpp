@@ -17,14 +17,7 @@ TetrisCreator::Shape TetrisCreator::RandShape()
     return static_cast<TetrisCreator::Shape>(qrand() % TetrisCreator::Z);
 }
 
-
-
-int TetrisCreator::Times(TetrisCreator::Shape s)
-{
-    return ROTATE_TIMES[s];
-}
-
-void TetrisCreator::Clockwise(QPoint &pt, const QPoint &center)
+void TetrisCreator::Clock90(QPoint &pt, const QPoint &center)
 {
     pt -= center;
 
@@ -35,7 +28,17 @@ void TetrisCreator::Clockwise(QPoint &pt, const QPoint &center)
     pt += center;
 }
 
-void TetrisCreator::Anticlockwise(QPoint &pt, const QPoint &center)
+void TetrisCreator::Clock180(QPoint &pt, const QPoint &center)
+{
+    pt -= center;
+
+    pt.setX(-pt.x());
+    pt.setY(-pt.y());
+
+    pt += center;
+}
+
+void TetrisCreator::Clock270(QPoint &pt, const QPoint &center)
 {
     pt -= center;
 
@@ -45,6 +48,46 @@ void TetrisCreator::Anticlockwise(QPoint &pt, const QPoint &center)
 
     pt += center;
 }
+
+void TetrisCreator::ClockWise(int rotation, QList<QPoint> &pts, const QPoint &center)
+{
+    typedef void (*Clockfunc)(QPoint &pt, const QPoint &center);
+    Clockfunc func = NULL;
+
+    switch(rotation % 4)
+    {
+    case 1: func = Clock90; break;
+    case 2: func = Clock180; break;
+    case 3: func = Clock270; break;
+    default:
+        return;
+    }
+
+    for(int n=0; n<pts.size(); ++n)
+    {
+        func(pts[n],center);
+    }
+}
+
+void TetrisCreator::ClockWise(int rotation, QPoint &pt, const QPoint &center)
+{
+    switch(rotation % 4)
+    {
+    case 1: Clock90(pt, center); break;
+    case 2: Clock180(pt, center); break;
+    case 3: Clock270(pt, center); break;
+    default:
+        return;
+    }
+}
+
+
+
+int TetrisCreator::Times(TetrisCreator::Shape s)
+{
+    return ROTATE_TIMES[s];
+}
+
 
 
 QMap<TetrisCreator::Shape, QList<QPoint> > TetrisCreator::InitCells()

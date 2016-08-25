@@ -53,7 +53,7 @@ void TetrisGame::DropEnd()
     if(active)
     {
         _driver.Solidify();
-        _driver.RemoveLine(_judger.Eliminate(active->Points(), active->LT()));
+        _driver.RemoveLine(_judger.Eliminate(active->Points()));
     }
     AddCell();
 }

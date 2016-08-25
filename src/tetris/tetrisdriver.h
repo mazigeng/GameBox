@@ -87,9 +87,9 @@ private:
     /// \param lt 相对data左上角坐标
     /// \param value 对比值
     /// \return 返回true 有空间存放
-    bool IsSpacious(const QList<QPoint>& pts, const QPoint& lt, Diamond value = Background) const;
+    bool IsSpacious(const TetrisCell& cell, Diamond value = Background) const;
 
-    bool Adjust();
+    bool Adjust(TetrisCell &cell);
 
     void Predict();
     void ClearPredict();

@@ -9,12 +9,12 @@ TetrisJudger::TetrisJudger(const TetrisData &d, QObject *parent) : QObject(paren
 
 }
 
-QList<int> TetrisJudger::Eliminate(const QList<QPoint> &pts, const QPoint& LT)
+QList<int> TetrisJudger::Eliminate(const QList<QPoint> &pts)
 {
     QList<int> ret;
     foreach(const QPoint& pt, pts)
     {
-        int y = pt.y() + LT.y();
+        int y = pt.y();
         if (ret.contains(y))
             continue;
         ret.push_back(y);

@@ -2,11 +2,11 @@
 #include <QDebug>
 #include <QRect>
 
-TetrisCell::TetrisCell(TetrisCreator::Shape s, const QPoint &lt, QObject *parent) : QObject(parent), _pts(TetrisCreator::CELLS[s]), _s(s), _lt(lt), _rotaiton(0)
+TetrisCell::TetrisCell(TetrisCreator::Shape s, const QPoint &lt, QObject *parent) : QObject(parent), _s(s), _lt(lt), _rotaiton(0)
 {
 }
 
-TetrisCell::TetrisCell(const TetrisCell &other) :  QObject(other.parent()), _pts(other._pts), _s(other._s), _lt(other._lt), _rotaiton(0)
+TetrisCell::TetrisCell(const TetrisCell &other) :  QObject(other.parent()), _s(other._s), _lt(other._lt), _rotaiton(other._rotaiton)
 {
 
 }
@@ -15,7 +15,6 @@ TetrisCell &TetrisCell::operator=(const TetrisCell &other)
 {
     if(this != &other)
     {
-        _pts = other._pts;
         _s = other._s;
         _lt = other._lt;
         _rotaiton = other._rotaiton;
@@ -23,9 +22,15 @@ TetrisCell &TetrisCell::operator=(const TetrisCell &other)
     return *this;
 }
 
-const QList<QPoint> TetrisCell::Points() const
+QList<QPoint> TetrisCell::Points() const
 {
-    return _pts;
+    QList<QPoint> pts = TetrisCreator::CELLS[_s];
+    for(int i=0; i<pts.size(); ++i)
+    {
+        TetrisCreator::ClockWise(_rotaiton,pts[i],TetrisCreator::ROTATE_CENTER[_s]);
+        pts[i] += _lt;
+    }
+    return pts;
 }
 
 TetrisCreator::Shape TetrisCell::Shape() const
@@ -46,7 +51,7 @@ const QPoint &TetrisCell::LT() const
 QRect TetrisCell::Rect() const
 {
     QRect ret(QPoint(10,10),QPoint(-10,-10));
-    foreach(const QPoint& pt, _pts)
+    foreach(const QPoint& pt, TetrisCreator::CELLS[_s])
     {
         if(pt.x() < ret.left())
             ret.setLeft(pt.x());
@@ -67,41 +72,13 @@ QRect TetrisCell::Rect() const
 void TetrisCell::Rotate()
 {
     int times = TetrisCreator::Times(_s);
-    if(times == 2)
-    {
+    if(times != 0)
         _rotaiton = (_rotaiton + 1) % times;
-        for(int n=0; n<_pts.size(); ++n)
-        {
-            if(_rotaiton == 0)
-                TetrisCreator::Anticlockwise(_pts[n], TetrisCreator::ROTATE_CENTER[_s]);
-            else
-                TetrisCreator::Clockwise(_pts[n], TetrisCreator::ROTATE_CENTER[_s]);
-        }
-    }
-    else if(times == 4)
-    {
-        _rotaiton = (_rotaiton + 1) % times;
-        for(int n=0; n<_pts.size(); ++n)
-        {
-            TetrisCreator::Clockwise(_pts[n],TetrisCreator::ROTATE_CENTER[_s]);
-        }
-    }
-
 }
 
 void TetrisCell::ReRotate()
 {
     int times = TetrisCreator::Times(_s);
-    if(times == 2)
-    {
-        Rotate();
-    }
-    else if(times == 4)
-    {
+    if(times != 0)
         _rotaiton = (_rotaiton - 1 + times) % times;
-        for(int n=0; n<_pts.size(); ++n)
-        {
-            TetrisCreator::Anticlockwise(_pts[n],TetrisCreator::ROTATE_CENTER[_s]);
-        }
-    }
 }

@@ -46,7 +46,7 @@ void ConsoleModem::Reflash()
             _stdOut << TransData(_chessboard.At(x,y));
         }
 
-        if((y+1) % 5 == 0)
+        if((y+1) % 5 == 0 && y < 16)
         {
             _stdOut <<  QString("├────┤");
         }
@@ -60,7 +60,7 @@ void ConsoleModem::Reflash()
             _stdOut << QString("│") ;
         }
         else
-            _stdOut << QString("│");
+            _stdOut << QString("│        │");
 
         _stdOut << endl;
 
@@ -72,7 +72,7 @@ void ConsoleModem::Reflash()
     {
         _stdOut << QString("─");
     }
-    _stdOut << QString("┘") << endl;
+    _stdOut << QString("┴────┘") << endl;
 }
 
 void ConsoleModem::Gotoxy(int x,int y)

@@ -15,7 +15,7 @@ public:
     TetrisCell& operator=(const TetrisCell& other);
 
     // 形状的点数据
-    const QList<QPoint> Points() const;
+    QList<QPoint> Points() const;
 
     TetrisCreator::Shape Shape() const;
 
@@ -37,7 +37,6 @@ signals:
 public slots:
 
 private:
-    QList<QPoint> _pts;     // cell点坐标
     TetrisCreator::Shape _s;               // 记录本cell形状
     QPoint _lt;             // cell相对坐标
     int _rotaiton;          // cell当前旋转度

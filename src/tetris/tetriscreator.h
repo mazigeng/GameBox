@@ -28,8 +28,17 @@ public:
     /// \brief Clockwise 围绕center旋转一个点90度的算法
     /// \param pt 被旋转点坐标
     /// \param center 旋转中心坐标
-    static void Clockwise(QPoint& pt, const QPoint& center);
-    static void Anticlockwise(QPoint& pt, const QPoint& center);
+
+    static void Clock90(QPoint& pt, const QPoint& center);
+    static void Clock180(QPoint& pt, const QPoint& center);
+    static void Clock270(QPoint& pt, const QPoint& center);
+    /// \brief ClockWise 围绕center依据rotation指定的90度的倍数，顺时针旋转pts,。
+    /// \param rotation 指定90度的多少被，取值2即旋转180度
+    /// \param pts 被旋转的点集合
+    /// \param center 旋转围绕中心
+    static void ClockWise(int rotation, QList<QPoint>& pts, const QPoint& center);
+    static void ClockWise(int rotation, QPoint& pt, const QPoint& center);
+
 
     /// \brief Times 获得一个形状可旋转的次数
     /// \param s 形状Shape

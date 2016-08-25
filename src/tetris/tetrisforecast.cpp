@@ -18,7 +18,7 @@ void TetrisForecast::Enqueue(TetrisCreator::Shape s)
 
     foreach(const QPoint& pt, _qCell.last().Points())
     {
-        _data.At(pt + _qCell.last().LT()) = Cell;
+        _data.At(pt) = Cell;
     }
     emit DataChange();
 }

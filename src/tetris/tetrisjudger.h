@@ -15,7 +15,7 @@ public:
     /// \brief Eliminate 判断是否消除，依据给定点的所在行来判断。
     /// \param pts 点队列
     /// \return 可以消除的y索引。
-    QList<int> Eliminate(const QList<QPoint>& pts, const QPoint &LT);
+    QList<int> Eliminate(const QList<QPoint>& pts);
 
 signals:
 

@@ -49,11 +49,12 @@ bool TetrisDriver::Move(const QPoint &offset)
     bool ret = false;
 
     // 探测新位置是否有障碍。
-    if(IsSpacious(_active->Points(), _active->LT() + offset))
+    TetrisCell temp(*_active);
+    temp.SetLT(temp.LT() + offset);
+    if(IsSpacious(temp))
     {
         SolidifyValue(Blank);        // 擦除
-        _active->SetLT(_active->LT() + offset);              // 更改坐标
-
+        *_active = temp;
         Predict();
         SolidifyValue(Cell);        // 更新当前显示
 
@@ -76,26 +77,19 @@ void TetrisDriver::DropFinish()
 bool TetrisDriver::Rotate()
 {
     Q_ASSERT(_active);
-    bool ret=true;
+    bool ret=false;
 
-    SolidifyValue(Blank);
-    _active->Rotate();
+    TetrisCell temp(*_active);
+    temp.Rotate();
 
-    if(!IsSpacious(_active->Points(),_active->LT()))
+    if(IsSpacious(temp) || Adjust(temp))
     {
-        if(!Adjust())
-        {
-            _active->ReRotate();
-            ret = false;
-        }
-    }
-
-    Predict();
-    SolidifyValue(Cell);        // 更新当前显示
-
-    if(ret)
-    {
+        SolidifyValue(Blank);
+        *_active = temp;
+        Predict();
+        SolidifyValue(Cell);
         emit DataChange();
+        ret = true;
     }
 
     return ret;
@@ -112,10 +106,7 @@ void TetrisDriver::RemoveLine(const QList<int> &lines)
     }
 
     if(lines.size())
-    {
-
         emit DataChange();
-    }
 }
 
 const TetrisCell *TetrisDriver::Active()
@@ -142,47 +133,54 @@ void TetrisDriver::SolidifyValue(TetrisCell *cell, Diamond v)
     Q_ASSERT(cell);
     foreach (QPoint pt, cell->Points())
     {
-        _datas.At(pt + cell->LT()) = v;
+        _datas.At(pt) = v;
     }
 }
 
-bool TetrisDriver::IsSpacious(const QList<QPoint> &pts, const QPoint &lt, Diamond value) const
+bool TetrisDriver::IsSpacious(const TetrisCell &cell, Diamond value) const
 {
-    foreach(const QPoint& pt, pts)
+    foreach(const QPoint& pt, cell.Points())
     {
-        QPoint ptAt = pt + lt;
-        if(ptAt.x() < 0 || ptAt.x() >= _datas.Size().width() ||
-           ptAt.y() < 0 || ptAt.y() >= _datas.Size().height() ||
-           _datas.At(ptAt) == value)
+        if(pt.x() < 0 || pt.x() >= _datas.Size().width() ||
+           pt.y() < 0 || pt.y() >= _datas.Size().height() ||
+           _datas.At(pt) == value)
             return false;
     }
     return true;
 }
 
-bool TetrisDriver::Adjust()
+bool TetrisDriver::Adjust(TetrisCell& cell)
 {
     Q_ASSERT(_active);
-    QPoint lt = _active->LT();
+    QPoint lt = cell.LT();
     // 左移一格调整
-    _active->SetLT(lt + QPoint(-1,0));
-    if(IsSpacious(_active->Points(), _active->LT()))
+    cell.SetLT(lt + QPoint(-1,0));
+    if(IsSpacious(cell))
         return true;
 
     // 右移一格调整
-    _active->SetLT(lt + QPoint(1,0));
-    if(IsSpacious(_active->Points(), _active->LT()))
+    cell.SetLT(lt + QPoint(1,0));
+    if(IsSpacious(cell))
         return true;
 
     // 对于I形状，我们特殊处理，允许它再右移一次。
-    if(_active->Shape() == TetrisCreator::I)
+    if(cell.Shape() == TetrisCreator::I)
     {
         // 右移二格调整
-        _active->SetLT(lt + QPoint(2,0));
-        if(IsSpacious(_active->Points(), _active->LT()))
+        cell.SetLT(lt + QPoint(2,0));
+        if(IsSpacious(cell))
             return true;
     }
 
-    _active->SetLT(lt);
+    // 对于刚出生的形状，我们可以让他往下移一次
+    if(cell.LT().y() == 0)
+    {
+        cell.SetLT(lt + QPoint(0,1));
+        if(IsSpacious(cell))
+            return true;
+    }
+
+    cell.SetLT(lt);
     return false;
 
 }
@@ -190,34 +188,35 @@ bool TetrisDriver::Adjust()
 void TetrisDriver::Predict()
 {
     Q_ASSERT(_active);
-    QPoint PreLt(_active->LT().x(), _datas.Size().height());
+    TetrisCell PreCell(*_active);
+    PreCell.SetLT(QPoint(PreCell.LT().x(),_datas.Size().height()));
 
     foreach(const QPoint& pt, _active->Points())
     {
-        int i = _datas.indexOfY(pt.x() + _active->LT().x(),Background, pt.y() + _active->LT().y());
+        int i = _datas.indexOfY(pt.x(),Background, pt.y());
         i = (i == -1 ? _datas.Size().height() : i);
 
-        int offset = i - pt.y() - _active->LT().y() - 1;
+        int offset = i - pt.y() - 1;
 
-        QPoint newLt = _active->LT() + QPoint(0,offset);
+        TetrisCell temp(*_active);
+        temp.SetLT(_active->LT() + QPoint(0,offset));
 
-        if(IsSpacious(_active->Points(),newLt))
+        if(IsSpacious(temp))
         {
-            if(PreLt.y() > newLt.y())
-                PreLt = newLt;
+            if(PreCell.LT().y() > temp.LT().y())
+                PreCell = temp;
         }
     }
 
 
     // 显示
-    if(PreLt != _active->LT())
+    if(PreCell.LT() != _active->LT())
     {
         if(_prediction)
         {
             ClearPredict();
         }
-        _prediction = new TetrisCell(*_active);
-        _prediction->SetLT(PreLt);
+        _prediction = new TetrisCell(PreCell);
         SolidifyValue(_prediction,Prediction);
     }
 
