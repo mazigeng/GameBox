@@ -131,16 +131,17 @@ void TetrisDriver::SolidifyValue(Diamond v)
 void TetrisDriver::SolidifyValue(TetrisCell *cell, Diamond v)
 {
     Q_ASSERT(cell);
-    foreach (QPoint pt, cell->Points())
+    for (int i=0; i<cell->Size(); ++i)
     {
-        _datas.At(pt) = v;
+        _datas.At(cell->Point(i)) = v;
     }
 }
 
 bool TetrisDriver::IsSpacious(const TetrisCell &cell, Diamond value) const
 {
-    foreach(const QPoint& pt, cell.Points())
+    for(int i=0; i<cell.Size(); ++i)
     {
+        QPoint pt = cell.Point(i);
         if(pt.x() < 0 || pt.x() >= _datas.Size().width() ||
            pt.y() < 0 || pt.y() >= _datas.Size().height() ||
            _datas.At(pt) == value)

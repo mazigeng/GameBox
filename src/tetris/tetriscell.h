@@ -16,6 +16,9 @@ public:
 
     // 形状的点数据
     QList<QPoint> Points() const;
+    QPoint Point(int i) const;
+
+    int Size() const;
 
     TetrisCreator::Shape Shape() const;
 

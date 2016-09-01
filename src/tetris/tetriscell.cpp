@@ -33,6 +33,22 @@ QList<QPoint> TetrisCell::Points() const
     return pts;
 }
 
+QPoint TetrisCell::Point(int i) const
+{
+    Q_ASSERT(i>=0 && i<Size());
+    QPoint ret = TetrisCreator::CELLS[_s][i];
+
+    TetrisCreator::ClockWise(_rotaiton,ret,TetrisCreator::ROTATE_CENTER[_s]);
+    ret += _lt;
+
+    return ret;
+}
+
+int TetrisCell::Size() const
+{
+    return TetrisCreator::CELLS[_s].size();
+}
+
 TetrisCreator::Shape TetrisCell::Shape() const
 {
     return _s;
