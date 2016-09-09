@@ -1,11 +1,14 @@
 #include "tetriscreator.h"
+#include "tetriscell.h"
 #include <QTime>
 
 const QMap<TetrisCreator::Shape, QList<QPoint> > TetrisCreator::CELLS(TetrisCreator::InitCells());
 const QMap<TetrisCreator::Shape, int> TetrisCreator::ROTATE_TIMES(TetrisCreator::InitRotateTimes());
 const QMap<TetrisCreator::Shape, QPoint> TetrisCreator::ROTATE_CENTER(TetrisCreator::InitRotateCenter());     // 形状旋转中心
 
-TetrisCreator::Shape TetrisCreator::RandShape()
+
+
+TetrisCell TetrisCreator::RandCell()
 {
     QTime t;
     if(t.msecsSinceStartOfDay() == 0)
@@ -13,8 +16,12 @@ TetrisCreator::Shape TetrisCreator::RandShape()
         t = QTime::currentTime();
         qsrand(t.msecsSinceStartOfDay());
     }
+    TetrisCreator::Shape s = static_cast<TetrisCreator::Shape>(qrand() % TetrisCreator::Z);
+    int r = qrand() % Times(s);
 
-    return static_cast<TetrisCreator::Shape>(qrand() % TetrisCreator::Z);
+    TetrisCell ret(s,QPoint(0,0),r);
+    ret.SetLT(ret.RelativeZero());
+    return ret;
 }
 
 void TetrisCreator::Clock90(QPoint &pt, const QPoint &center)
@@ -116,7 +123,7 @@ QMap<TetrisCreator::Shape, QList<QPoint> > TetrisCreator::InitCells()
 QMap<TetrisCreator::Shape, int> TetrisCreator::InitRotateTimes()
 {
     QMap<TetrisCreator::Shape, int> ret;
-    ret.insert(TetrisCreator::O,0);
+    ret.insert(TetrisCreator::O,1);
     ret.insert(TetrisCreator::T,4);
     ret.insert(TetrisCreator::L,4);
     ret.insert(TetrisCreator::J,4);
@@ -140,3 +147,5 @@ QMap<TetrisCreator::Shape, QPoint> TetrisCreator::InitRotateCenter()
 
     return ret;
 }
+
+

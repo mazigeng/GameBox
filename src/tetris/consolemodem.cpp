@@ -22,7 +22,7 @@ QString ConsoleModem::TransData(Diamond d) const
 {
     // 临时方案的映射表
     Q_ASSERT(d >= 0 && d<4);
-    static const QString keymap[] = {"  ", "■","■","□"};
+    static const QString keymap[] = {"  ","□" , "■","■"};
 
     return keymap[d];
 }

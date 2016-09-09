@@ -3,6 +3,7 @@
 #include "tetrisdata.h"
 #include <QPoint>
 #include "define.h"
+#include "tetriscell.h"
 
 TetrisJudger::TetrisJudger(const TetrisData &d, QObject *parent) : QObject(parent), _d(d)
 {
@@ -28,5 +29,19 @@ QList<int> TetrisJudger::Eliminate(const QList<QPoint> &pts)
         }
     }
     return ret;
+}
+
+
+bool TetrisJudger::IsSpacious(const TetrisCell &cell, Diamond value) const
+{
+    for(int i=0; i<cell.Size(); ++i)
+    {
+        QPoint pt = cell.Point(i);
+        if(pt.x() < 0 || pt.x() >= _d.Size().width() ||
+           pt.y() < 0 || pt.y() >= _d.Size().height() ||
+           _d.At(pt) == value)
+            return false;
+    }
+    return true;
 }
 

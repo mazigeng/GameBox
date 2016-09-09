@@ -5,11 +5,11 @@ TetrisForecast::TetrisForecast(QObject *parent) : QObject(parent), _data(4,4*3)
 
 }
 
-void TetrisForecast::Enqueue(TetrisCreator::Shape s)
+void TetrisForecast::Enqueue(const TetrisCell& cell)
 {
+    _qCell.enqueue(cell);
 
-    _qCell.enqueue(TetrisCell(s, QPoint(0,4*2)));
-
+    _qCell.last().Move(QPoint(0,4*2));
     // 保证绘制在最低下
     for(int y=0; y<4; ++y)
     {
@@ -23,9 +23,9 @@ void TetrisForecast::Enqueue(TetrisCreator::Shape s)
     emit DataChange();
 }
 
-TetrisCreator::Shape TetrisForecast::Dequeue()
+TetrisCell TetrisForecast::Dequeue()
 {
-    return _qCell.dequeue().Shape();
+    return _qCell.dequeue();
 }
 
 const TetrisData &TetrisForecast::data()

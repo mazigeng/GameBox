@@ -16,6 +16,7 @@ public:
     Diamond& At(int x, int y);
     Diamond& At(const QPoint& xy);
     const Diamond& At(int x, int y) const;
+    const Diamond& At(const QPoint& xy) const;
 
     /// \brief RemoveLine 删除以y坐标定义的一整行
     /// \param y
@@ -28,7 +29,7 @@ public:
     /// \param value 查找的值
     /// \param from 起点索引
     /// \return  未找到返回-1，找到返回索引
-    int indexOfY(int x, Diamond value, int from = 0);
+    int indexOfY(int x, Diamond value, int from = 0) const;
 
     /// \brief Fill 填充Data所有At为value
     /// \param value

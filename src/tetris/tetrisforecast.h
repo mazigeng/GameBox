@@ -14,8 +14,8 @@ class TetrisForecast : public QObject
 public:
     explicit TetrisForecast(QObject *parent = 0);
 
-    void Enqueue(TetrisCreator::Shape s);
-    TetrisCreator::Shape Dequeue();
+    void Enqueue(const TetrisCell& cell);
+    TetrisCell Dequeue();
 
     const TetrisData& data();
 

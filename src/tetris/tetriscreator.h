@@ -3,7 +3,7 @@
 
 #include <QMap>
 #include <QPoint>
-
+class TetrisCell;
 class TetrisCreator
 {
 public:
@@ -21,9 +21,9 @@ public:
     static const QMap<TetrisCreator::Shape, int> ROTATE_TIMES;         // 形状可旋转次数
     static const QMap<TetrisCreator::Shape, QPoint> ROTATE_CENTER;     // 形状旋转中心
 
-    /// \brief RandShape 随机产生形状
-    /// \return 形状Shape
-    static Shape RandShape();
+    /// \brief RandCell 随机产生Cell, 形状随机，角度随机，其他默认
+    /// \return 随机的cell
+    static TetrisCell RandCell();
 
     /// \brief Clockwise 围绕center旋转一个点90度的算法
     /// \param pt 被旋转点坐标

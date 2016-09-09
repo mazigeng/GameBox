@@ -4,9 +4,17 @@
 enum Diamond
 {
     Blank,
-    Background,
+    Prediction,
     Cell,
-    Prediction
+    Background
+};
+
+enum Direction
+{
+    Left,
+    Up,
+    Right,
+    Down
 };
 
 #endif // DEFINE

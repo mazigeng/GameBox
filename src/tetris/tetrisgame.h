@@ -7,6 +7,7 @@
 #include "consolemodem.h"
 #include "tetrisjudger.h"
 #include "tetrisforecast.h"
+#include "tetrispredict.h"
 
 class TetrisGame : public QObject
 {
@@ -18,13 +19,30 @@ public:
     void Resume();
 
 signals:
+    void GameOver();
+    void DataChange();
+
 
 public slots:
+    void DropBottom();
+    void Drop();
+    void MoveActive(Direction d);
+    bool Rotate();
 
 private slots:
-    void AddCell();
-    void DropEnd();
+
+
     void KeyControl(long vk);
+
+
+private:
+    void AddCell();
+    void DropOver();
+    bool TryMove(TetrisCell &cell, Direction d);
+    bool CanMove(const TetrisCell& cell, Direction d);
+    bool Adjust(TetrisCell &cell);
+
+
 
 
 
@@ -36,6 +54,11 @@ private:
     TetrisJudger _judger;
     KeyboardMonitor _km;
     bool _pause;
+    QTimer _dropTimer;
+    TetrisPredict _prediction;
+    TetrisCell* _active;
+
+
 
 };
 

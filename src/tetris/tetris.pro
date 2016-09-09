@@ -17,7 +17,8 @@ SOURCES += main.cpp \
     tetrisgame.cpp \
     tetrisjudger.cpp \
     tetriscreator.cpp \
-    tetrisforecast.cpp
+    tetrisforecast.cpp \
+    tetrispredict.cpp
 
 
 CONFIG(debug, debug|release) {
@@ -36,5 +37,6 @@ HEADERS += \
     tetrisjudger.h \
     tetriscreator.h \
     define.h \
-    tetrisforecast.h
+    tetrisforecast.h \
+    tetrispredict.h
 
